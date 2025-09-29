@@ -93,23 +93,42 @@ def sieve_of_eratosthenes(n: int) -> List[int]:
 
 def linear_equation_solver(A: List[List[float]], b: List[float]) -> List[float]:
     n = len(A)
-    augmented = [row[:] + [b[i]] for i, row in enumerate(A)]
+    # Pre-allocate augmented matrix for speed; avoid repeated list ops
+    augmented = [A[i][:] + [b[i]] for i in range(n)]
+
     for i in range(n):
+        # Pivot: Find the max element in the current column (i)
         max_idx = i
+        max_val = abs(augmented[i][i])
         for j in range(i + 1, n):
-            if abs(augmented[j][i]) > abs(augmented[max_idx][i]):
+            cur_val = abs(augmented[j][i])
+            if cur_val > max_val:
                 max_idx = j
-        augmented[i], augmented[max_idx] = augmented[max_idx], augmented[i]
+                max_val = cur_val
+        if max_idx != i:
+            augmented[i], augmented[max_idx] = augmented[max_idx], augmented[i]
+        ai_i = augmented[i][i]
+
+        # Row reduction below i
         for j in range(i + 1, n):
-            factor = augmented[j][i] / augmented[i][i]
+            aj_i = augmented[j][i]
+            if aj_i == 0.0:
+                continue  # Skip if already zero, minor skip cost
+            factor = aj_i / ai_i
+            row_j = augmented[j]
+            row_i = augmented[i]
+            # Loop only over needed entries (in-place, use slice assignment where possible)
             for k in range(i, n + 1):
-                augmented[j][k] -= factor * augmented[i][k]
-    x = [0] * n
+                row_j[k] -= factor * row_i[k]
+
+    # Back substitution
+    x = [0.0] * n
     for i in range(n - 1, -1, -1):
-        x[i] = augmented[i][n]
+        acc = augmented[i][n]
+        row_i = augmented[i]
         for j in range(i + 1, n):
-            x[i] -= augmented[i][j] * x[j]
-        x[i] /= augmented[i][i]
+            acc -= row_i[j] * x[j]
+        x[i] = acc / row_i[i]
     return x
 
 
