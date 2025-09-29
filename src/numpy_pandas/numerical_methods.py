@@ -70,11 +70,13 @@ def slow_matrix_inverse(matrix: List[List[float]]) -> List[List[float]]:
 
 
 def monte_carlo_pi(num_samples: int) -> float:
+    # Use local variable lookup for faster runtime
+    uniform = random.uniform
     inside_circle = 0
     for _ in range(num_samples):
-        x = random.uniform(-1, 1)
-        y = random.uniform(-1, 1)
-        if x**2 + y**2 <= 1:
+        x = uniform(-1, 1)
+        y = uniform(-1, 1)
+        if x * x + y * y <= 1.0:
             inside_circle += 1
     return 4 * inside_circle / num_samples
 
