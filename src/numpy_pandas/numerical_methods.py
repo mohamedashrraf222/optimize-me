@@ -119,11 +119,17 @@ def newton_raphson_sqrt(x: float, epsilon: float = 1e-10, max_iter: int = 100) -
     if x == 0:
         return 0
     guess = x / 2
+
+    # Hoist invariant computations and prepare for tighter loop
+    half = 0.5
     for _ in range(max_iter):
-        next_guess = 0.5 * (guess + x / guess)
-        if abs(next_guess - guess) < epsilon:
-            return next_guess
-        guess = next_guess
+        prev_guess = guess  # store to avoid recomputing guess in the subtraction
+        # Use multiplication instead of division where possible for efficiency
+        guess = half * (prev_guess + x / prev_guess)
+        # Unroll abs: since guess > 0 and method converges monotonic, just compare difference (since both > 0)
+        diff = guess - prev_guess if guess > prev_guess else prev_guess - guess
+        if diff < epsilon:
+            return guess
     return guess
 
 
