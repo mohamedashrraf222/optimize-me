@@ -11,11 +11,22 @@ def numerical_integration_rectangle(
     if a > b:
         a, b = b, a
     h = (b - a) / n
+
+    # Avoid repeated attribute lookups
+    f_local = f
+    a_local = a
+    h_local = h
+
+    # Use local variable for performance, avoid recomputing x in Python for-loop
     result = 0.0
-    for i in range(n):
-        x = a + i * h
-        result += f(x)
-    return result * h
+
+    # Use range(n) and loop-increment to avoid repeated add and function call setup
+    x = a_local
+    for _ in range(n):
+        result += f_local(x)
+        x += h_local
+
+    return result * h_local
 
 
 def binomial_coefficient_recursive(n: int, k: int) -> int:
